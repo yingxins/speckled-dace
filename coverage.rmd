@@ -1,0 +1,54 @@
+---
+title: "coverage"
+author: "Yingxin Su"
+date: "1/28/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+```
+
+
+```{r}
+
+read_length <- read.table("S3_material.txt",header=F)
+colnames(read_length)[1] = "read"
+colnames(read_length)[2] = "Length"
+
+coverage <- read.csv("contig50coverage.csv", header = FALSE)
+coverage[1,1] = "16.5442"
+coverage <- as.vector(coverage)
+coverage<- data.frame(as.numeric(unlist(coverage)))
+colnames(coverage)[1] = "Depth"
+cof <- coverage %>% ggplot(aes(x = "", y = Depth))+ 
+  geom_violin(aes(fill = "purple"), trim = FALSE, width = 0.2)+
+  geom_point(position=position_jitter(0.1), 
+             shape = 21, size =1.5, 
+             alpha=0.8, fill="#AC87F2")+ theme_classic()+
+  scale_fill_manual(values = c("#AC87F2"))+
+  stat_summary(fun.y=mean, geom="point", color="black")+
+  guides(fill = "none") + theme(axis.title.x = element_blank(),
+                                            axis.line = element_line(size = 1.2),
+                                            axis.title.y = element_text(face = "bold"))
+(plot_length <- read_length %>% ggplot(aes(x = "", y = Length))+ 
+  geom_violin(aes(fill = "orange"), trim = FALSE, width = 0.2)+
+  geom_point(position=position_jitter(0.1), 
+             shape = 21, size =1.5, 
+             alpha=0.8, fill="orange")+ theme_classic()+
+  scale_fill_manual(values = c("orange"))+
+  stat_summary(fun.y=mean, geom="point", color="black")+
+  guides(fill = "none") + theme(axis.title.x = element_blank(),
+                                            axis.line = element_line(size = 1.2),
+                                            axis.title.y = element_text(face = "bold")))
+cof
+min(coverage$Depth)
+max(coverage$Depth)
+sqrt(var(coverage$Depth))
+```
+

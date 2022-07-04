@@ -1,0 +1,636 @@
+---
+title: "Admixture Analysis Region 1-3"
+author: "Yingxin Su"
+date: "1/7/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Load the library 
+
+```{r}
+library(viridis)
+library(ggplot2) 
+library(scales) 
+library(dplyr) 
+library(tidyr)
+library(forcats)
+library(plotly) 
+library(RColorBrewer)
+library(cowplot)
+```
+
+
+#Load the data
+
+```{r}
+#Load the metadata 
+data_r1 <- read.csv("r1/spk_r1.csv",header = FALSE)
+data_r2 <- read.csv("r2/spk_r2.csv",header = FALSE)
+data_r3 <- read.csv("r3/spk_r3.csv", header = FALSE)
+#load Q file for 3 subregions 
+qlistr12 <- read.table("r1/r1_2_output_reord.qopt", header = FALSE)
+qlistr13 <- read.table("r1/r1_3_output_reord.qopt", header = FALSE)
+qlistr14 <- read.table("r1/r1_4_output_reord.qopt", header = FALSE)
+qlistr15 <- read.table("r1/r1_5_output_reord.qopt", header = FALSE)
+qlistr22 <- read.table("r2/r2_2_output_reord.qopt", header = FALSE)
+qlistr23 <- read.table("r2/r2_3_output_reord.qopt", header = FALSE)
+qlistr24 <- read.table("r2/r2_4_output_reord.qopt", header = FALSE)
+qlistr25 <- read.table("r2/r2_5_output_reord.qopt", header = FALSE)
+qlistr32 <- read.table("r3/r3_2_output_reord.qopt", header = FALSE)
+qlistr33 <- read.table("r3/r3_3_output_reord.qopt", header = FALSE)
+qlistr34 <- read.table("r3/r3_4_output_reord.qopt", header = FALSE)
+qlistr35 <- read.table("r3/r3_5_output_reord.qopt", header = FALSE)
+```
+
+#rename the metadata
+
+```{r}
+colnames(data_r1)[1] = "FID"
+colnames(data_r1)[2] = "Species"
+colnames(data_r1)[3] = "LOCATION"
+colnames(data_r2)[1] = "FID"
+colnames(data_r2)[2] = "Species"
+colnames(data_r2)[3] = "LOCATION"
+colnames(data_r3)[1] = "FID"
+colnames(data_r3)[2] = "Species"
+colnames(data_r3)[3] = "LOCATION"
+#data_r1$Species <- gsub("_", " ", data_r1$Species)
+#data_r1$Species <- gsub("Speckled Dace", "SD", data_r1$Species)
+#data_r2$Species <- gsub("_", " ", data_r2$Species)
+#data_r2$Species <- gsub("Speckled Dace", "SD", data_r2$Species)
+#data_r3$Species <- gsub("_", " ", data_r3$Species)
+#data_r3$Species <- gsub("Speckled Dace", "SD", data_r3$Species)
+#data_r3$LOCATION <- gsub("SouthernCAC", "SCACoast",data_r3$LOCATION)
+#data_r3$LOCATION <- gsub("Bonneville", "B",data_r3$LOCATION)
+#data_r3$LOCATION <- gsub("SouthernCAC", "SCACoast",data_r3$LOCATION)
+```
+
+#rename qlist
+
+```{r}
+colnames(qlistr12)[1] = "cluster1"
+colnames(qlistr12)[2] = "cluster2"
+colnames(qlistr13)[1] = "cluster1"
+colnames(qlistr13)[2] = "cluster2"
+colnames(qlistr13)[3] = "cluster3"
+colnames(qlistr14)[1] = "cluster1"
+colnames(qlistr14)[2] = "cluster2"
+colnames(qlistr14)[3] = "cluster3"
+colnames(qlistr14)[4] = "cluster4"
+colnames(qlistr15)[1] = "cluster1"
+colnames(qlistr15)[2] = "cluster2"
+colnames(qlistr15)[3] = "cluster3"
+colnames(qlistr15)[4] = "cluster4"
+colnames(qlistr15)[5] = "cluster5"
+
+colnames(qlistr22)[1] = "cluster1"
+colnames(qlistr22)[2] = "cluster2"
+colnames(qlistr23)[1] = "cluster1"
+colnames(qlistr23)[2] = "cluster2"
+colnames(qlistr23)[3] = "cluster3"
+colnames(qlistr24)[1] = "cluster1"
+colnames(qlistr24)[2] = "cluster2"
+colnames(qlistr24)[3] = "cluster3"
+colnames(qlistr24)[4] = "cluster4"
+colnames(qlistr25)[1] = "cluster1"
+colnames(qlistr25)[2] = "cluster2"
+colnames(qlistr25)[3] = "cluster3"
+colnames(qlistr25)[4] = "cluster4"
+colnames(qlistr25)[5] = "cluster5"
+
+colnames(qlistr32)[1] = "cluster1"
+colnames(qlistr32)[2] = "cluster2"
+colnames(qlistr33)[1] = "cluster1"
+colnames(qlistr33)[2] = "cluster2"
+colnames(qlistr33)[3] = "cluster3"
+colnames(qlistr34)[1] = "cluster1"
+colnames(qlistr34)[2] = "cluster2"
+colnames(qlistr34)[3] = "cluster3"
+colnames(qlistr34)[4] = "cluster4"
+colnames(qlistr35)[1] = "cluster1"
+colnames(qlistr35)[2] = "cluster2"
+colnames(qlistr35)[3] = "cluster3"
+colnames(qlistr35)[4] = "cluster4"
+colnames(qlistr35)[5] = "cluster5"
+```
+ 
+#bind the list 
+
+```{r}
+admix12 <- cbind(data_r1, qlistr12)
+admix13 <- cbind(data_r1, qlistr13)
+admix14 <- cbind(data_r1, qlistr14)
+admix15 <- cbind(data_r1, qlistr15)
+
+admix22 <- cbind(data_r2, qlistr22)
+admix23 <- cbind(data_r2, qlistr23)
+admix24 <- cbind(data_r2, qlistr24)
+admix25 <- cbind(data_r2, qlistr25)
+
+admix32 <- cbind(data_r3, qlistr32)
+admix33 <- cbind(data_r3, qlistr33)
+admix34 <- cbind(data_r3, qlistr34)
+admix35 <- cbind(data_r3, qlistr35)
+```
+
+***Region1***
+
+#mutate 
+
+```{r}
+admix_gg12 <- admix12 %>% gather(key = clustname, value = "clust", cluster1:cluster2) %>% 
+  arrange(clustname, clust) %>% 
+  mutate(
+    SPP_ID3 = fct_reorder2(as.factor(FID), LOCATION, clust),
+    Location = fct_reorder2(as.factor(LOCATION), clustname, clust),
+    clustname = fct_reorder2(factor(clustname, levels = c("cluster1", "cluster2")), clustname, clust),
+    
+  ) 
+admix_gg12$location_reord <- factor(admix_gg12$LOCATION, levels = c("KLA", "CCA",  "SAC","BUT", "WAR"))
+admix_gg12$Species <- factor(admix_gg12$Species, levels = c("Klamath", "Sacramento", "Not Designated") )
+```
+
+```{r}
+admix_gg13 <- admix13 %>% gather(key = clustname, value = "clust", cluster1:cluster3) %>% 
+  arrange(clustname, clust) %>% 
+  mutate(
+    SPP_ID3 = fct_reorder2(as.factor(FID), LOCATION, clust),
+    Location = fct_reorder2(as.factor(LOCATION), clustname, clust),
+    clustname = fct_reorder2(factor(clustname, levels = c("cluster1", "cluster2", "cluster3")), clustname, clust))
+admix_gg13$location_reord <- factor(admix_gg13$LOCATION, levels = c("KLA", "CCA",  "SAC","BUT", "WAR"))
+```
+
+```{r}
+#K=4
+admix_gg14 <- admix14 %>% gather(key = clustname, value = "clust", cluster1:cluster4) %>% 
+  arrange(clustname, clust) %>% 
+  mutate(
+    SPP_ID3 = fct_reorder2(as.factor(FID), LOCATION, clust),
+    Location = fct_reorder2(as.factor(LOCATION), clustname, clust),
+    clustname = fct_reorder2(factor(clustname, levels = c("cluster1", "cluster2", "cluster3","cluster4")), clustname, clust),
+    
+  ) #%>% group_by(SUBREGION)
+admix_gg14$location_reord <- factor(admix_gg14$LOCATION, levels = c("KLA", "CCA",  "SAC","BUT", "WAR"))
+```
+
+```{r}
+admix_gg15 <- admix15 %>% gather(key = clustname, value = "clust", cluster1:cluster5) %>% 
+  arrange(clustname, clust) %>% 
+  mutate(
+    SPP_ID3 = fct_reorder2(as.factor(FID), LOCATION, clust),
+    Location = fct_reorder2(as.factor(LOCATION), clustname, clust),
+    clustname = fct_reorder2(factor(clustname, levels = c("cluster1", "cluster2", "cluster3","cluster4", "cluster5")), clustname, clust),
+    
+  ) 
+admix_gg15$location_reord <- factor(admix_gg15$LOCATION, levels = c("KLA", "CCA",  "SAC","BUT", "WAR"))
+```
+
+```{r}
+textr1 <- admix_gg12 %>% ggplot(aes(x = SPP_ID3, y = "")) + #geom_tile( color = "black", aes (fill = sub)) +
+  facet_grid(.~Species, scale = "free", space = "free") + labs(x = "", y = "") + scale_x_discrete(expand=c(0,0)) +#scale_fill_viridis_d() +
+  theme(legend.position = "bottom")  + theme(legend.position = "none") + 
+  theme(panel.spacing=unit(0.02, "lines"),
+        #panel.border = element_rect(colour = "black"),
+        axis.text.x=element_blank(), 
+        axis.text.y= element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.ticks.y=element_blank())+
+  theme(strip.text = element_text(size = 11, face = "bold.italic"),
+        strip.background = element_blank(),
+      ) + theme(plot.margin=unit(c(0,0,0,0),"cm"))
+textr1
+```
+
+#plot 
+
+```{r}
+(plot12 <- admix_gg12 %>% 
+    ggplot() + geom_col(aes(x=SPP_ID3, y=clust, fill=clustname),width=1) + 
+    scale_x_discrete(expand=c(0,0)) + 
+    scale_y_continuous(expand=c(0,0)) +
+    scale_fill_manual(name="Cluster",
+                      values=c("#6bc5d2","#e3c878","#e688a1","#ffba92","#d6e4aa"),
+                      labels=c("cluster1", "cluster2", "cluster3","cluster4", "cluster5"))+
+    theme_classic(base_size = 10) +
+    theme(axis.text.x = element_text(angle = 80, hjust = 0.5, size = 7)) +
+    labs(x="", y="K = 2") +
+    facet_grid(.~location_reord, scales = "free_x", space = "free_x") +
+    theme(strip.background = element_blank(), 
+          strip.text = element_text(size = 11, face = "bold"),
+          panel.spacing = unit(0, "lines"),
+          panel.border = element_rect(fill = NA, color = "gray10"),
+          axis.title.y = element_text(size = 12, face = "bold"),
+          axis.text.x=element_blank(),
+          axis.text.y=element_blank(),
+          axis.ticks.x=element_blank(),
+          axis.ticks.y=element_blank(),
+          legend.position = "none")) 
+
+#K=3
+(plot13 <- admix_gg13 %>% 
+    ggplot() + geom_col(aes(x=SPP_ID3, y=clust, fill=clustname),width=1) + 
+    scale_x_discrete(expand=c(0,0)) + 
+    scale_y_continuous(expand=c(0,0)) +
+    scale_fill_manual(name="Cluster",
+                      values=c("#6bc5d2","#e688a1","#e3c878"),
+                      labels=c("cluster1", "cluster2", "cluster3","cluster4", "cluster5"))+
+    theme_classic(base_size = 10) +
+    theme(axis.text.x = element_text(angle = 80, hjust = 0.5, size = 7)) +
+    labs(x="", y="K = 3") +
+    facet_grid(.~location_reord, scales = "free_x", space = "free_x") +
+    theme(strip.background = element_blank(), 
+          #strip.text = element_text(size = 10, face = "bold"),
+          strip.text.x = element_blank(),
+          panel.spacing = unit(0, "lines"),
+          panel.border = element_rect(fill = NA, color = "gray10"),
+          axis.title.y = element_text(size = 12, face = "bold"),
+          axis.text.x=element_blank(),
+          axis.text.y=element_blank(),
+          axis.ticks.x=element_blank(),
+          axis.ticks.y=element_blank(),
+          legend.position = "none")) 
+#K=4
+(plot14 <- admix_gg14 %>% 
+    ggplot() + geom_col(aes(x=SPP_ID3, y=clust, fill=clustname),width=1) + 
+    scale_x_discrete(expand=c(0,0)) + 
+    scale_y_continuous(expand=c(0,0)) +
+    scale_fill_manual(name="Cluster",
+                      values=c("#e688a1","#e3c878","#6bc5d2","#ffba92"),
+                      labels=c("cluster1", "cluster2", "cluster3","cluster4"))+
+    theme_classic(base_size = 10) +
+    theme(axis.text.x = element_text(angle = 80, hjust = 0.5, size = 7)) +
+    labs(x="", y="K = 4") +
+    facet_grid(.~location_reord, scales = "free_x", space = "free_x") +
+    theme(strip.background = element_blank(), 
+          strip.text.x = element_blank(),
+          panel.spacing = unit(0, "lines"),
+          panel.border = element_rect(fill = NA, color = "gray10"),
+          axis.title.y = element_text(size = 12, face = "bold"),
+          axis.text.x=element_blank(),
+          axis.text.y=element_blank(),
+          axis.ticks.x=element_blank(),
+          axis.ticks.y=element_blank(),
+          legend.position = "none")) 
+
+#K=5
+(plot15 <- admix_gg15 %>% 
+    ggplot() + geom_col(aes(x=SPP_ID3, y=clust, fill=clustname),width=1) + 
+    scale_x_discrete(expand=c(0,0)) + 
+    scale_y_continuous(expand=c(0,0)) +
+    scale_fill_manual(name="Cluster",
+                      values=c("#e688a1","#6bc5d2","#e3c878","#d6e4aa","#ffba92"),
+                      labels=c("cluster1", "cluster2", "cluster3","cluster4", "cluster5"))+
+    theme_classic(base_size = 10) +
+    theme(axis.text.x = element_text(angle = 80, hjust = 0.5, size = 7)) +
+    labs(x="", y="K = 5") +
+    facet_grid(.~location_reord, scales = "free_x", space = "free_x") +
+    theme(strip.background = element_blank(), 
+          strip.text.x = element_blank(),
+          panel.spacing = unit(0, "lines"),
+          panel.border = element_rect(fill = NA, color = "gray10"),
+          axis.title.y = element_text(size = 12, face = "bold"),
+          axis.text.x=element_blank(),
+          axis.text.y=element_blank(),
+          axis.ticks.x=element_blank(),
+          axis.ticks.y=element_blank(),
+          legend.position = "none"
+          )) 
+
+pr1 <- plot_grid(plot12,plot13,plot14,plot15,  nrow=4, rel_heights = c(1.1,0.9,0.9,0.9), axis = "lr", align = "v" )
+pr1
+```
+***Region2***
+
+#mutate 
+
+```{r}
+colnames(admix22)[4] = "SUBREGION"
+admix_gg22 <- admix22 %>% gather(key = clustname, value = "clust", cluster1:cluster2) %>% 
+  arrange(clustname, clust) %>% 
+  mutate(
+    SPP_ID3 = fct_reorder2(as.factor(FID), LOCATION, clust),
+    Location = fct_reorder2(as.factor(LOCATION), clustname, clust),
+    clustname = fct_reorder2(factor(clustname, levels = c("cluster1", "cluster2")), clustname, clust),
+    
+  ) 
+admix_gg22$location_reord <- factor(admix_gg22$LOCATION, levels = c("OWE", "LV","AMR","LAH" ))
+admix_gg22$Species <- factor(admix_gg22$Species, levels = c( "Owens","Long Valley", "Amargosa", "Lahontan"))
+admix_gg22$SPP_ID1 <- fct_reorder2(as.factor(admix_gg22$SPP_ID3), admix_gg22$location_reord, admix_gg22$SUBREGION)
+```
+
+```{r}
+colnames(admix23)[4] = "SUBREGION"
+admix_gg23 <- admix23 %>% gather(key = clustname, value = "clust", cluster1:cluster3) %>% 
+  arrange(clustname, clust) %>% 
+  mutate(
+    SPP_ID3 = fct_reorder2(as.factor(FID), LOCATION, clust),
+    Location = fct_reorder2(as.factor(LOCATION), clustname, clust),
+    clustname = fct_reorder2(factor(clustname, levels = c("cluster1", "cluster2", "cluster3")), clustname, clust))
+admix_gg23$location_reord <- factor(admix_gg23$LOCATION, levels = c("OWE", "LV","AMR","LAH"))
+admix_gg23$SPP_ID1 <- fct_reorder2(as.factor(admix_gg23$SPP_ID3), admix_gg23$location_reord, admix_gg23$SUBREGION)
+```
+
+```{r}
+colnames(admix24)[4] = "SUBREGION"
+admix_gg24 <- admix24 %>% gather(key = clustname, value = "clust", cluster1:cluster4) %>% 
+  arrange(clustname, clust) %>% 
+  mutate(
+    SPP_ID3 = fct_reorder2(as.factor(FID), LOCATION, clust),
+    Location = fct_reorder2(as.factor(LOCATION), clustname, clust),
+    clustname = fct_reorder2(factor(clustname, levels = c("cluster1", "cluster2", "cluster3","cluster4")), clustname, clust),
+    
+  ) #%>% group_by(SUBREGION)
+admix_gg24$location_reord <- factor(admix_gg24$LOCATION, levels = c("OWE", "LV","AMR","LAH" ))
+admix_gg24$SPP_ID1 <- fct_reorder2(as.factor(admix_gg24$SPP_ID3), admix_gg24$location_reord, admix_gg24$SUBREGION)
+```
+
+```{r}
+colnames(admix25)[4] = "SUBREGION"
+admix_gg25 <- admix25 %>% gather(key = clustname, value = "clust", cluster1:cluster5) %>% 
+  arrange(clustname, clust) %>% 
+  mutate(
+    SPP_ID3 = fct_reorder2(as.factor(FID), LOCATION, clust),
+    Location = fct_reorder2(as.factor(LOCATION), clustname, clust),
+    clustname = fct_reorder2(factor(clustname, levels = c("cluster1", "cluster2", "cluster3","cluster4", "cluster5")), clustname, clust),
+    
+  ) 
+admix_gg25$location_reord <- factor(admix_gg25$LOCATION, levels = c("OWE", "LV","AMR","LAH" ))
+admix_gg25$SPP_ID1 <- fct_reorder2(as.factor(admix_gg25$SPP_ID3), admix_gg25$location_reord, admix_gg25$SUBREGION)
+```
+
+#Plot 
+```{r}
+textr2 <- admix_gg22 %>% ggplot(aes(x = SPP_ID1, y = "")) + #geom_tile( color = "black", aes (fill = sub)) +
+  facet_grid(.~Species, scale = "free", space = "free") + labs(x = "", y = "") + scale_x_discrete(expand=c(0,0)) +#scale_fill_viridis_d() +
+  theme(legend.position = "bottom")  + theme(legend.position = "none") + 
+  theme(panel.spacing=unit(0.02, "lines"),
+        #panel.border = element_rect(colour = "black"),
+        axis.text.x=element_blank(), 
+        axis.text.y= element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.ticks.y=element_blank())+
+  theme(strip.text = element_text(size = 11, face = "bold.italic"),
+        strip.background = element_blank(),
+      ) + theme(plot.margin=unit(c(0,0,0,0),"cm"))
+textr2
+```
+
+```{r}
+(plot22 <- admix_gg22 %>% 
+    ggplot() + geom_col(aes(x=SPP_ID1, y=clust, fill=clustname),width = 1) + 
+    scale_x_discrete(expand=c(0,0)) + 
+    scale_y_continuous(expand=c(0,0)) +
+    scale_fill_manual(name="Cluster",
+                      values=c("#6bc5d2","#e3c878","#e688a1","#ffba92","#d6e4aa"),
+                      labels=c("cluster1", "cluster2", "cluster3","cluster4", "cluster5"))+
+    theme_classic(base_size = 10) +
+    theme(axis.text.x = element_text(angle = 80, hjust = 0.5, size = 7)) +
+    labs(x="", y="K = 2") +
+    facet_grid(.~location_reord, scales = "free_x", space = "free_x") +
+    theme(strip.background = element_blank(), 
+          strip.text = element_text(size = 11, face = "bold"),
+          panel.spacing = unit(0, "lines"),
+          panel.border = element_rect(fill = NA, color = "gray10"),
+          axis.title.y = element_text(size = 12, face = "bold"),
+          axis.text.x=element_blank(),
+          axis.text.y=element_blank(),
+          axis.ticks.x=element_blank(),
+          axis.ticks.y=element_blank(),
+          legend.position = "none")) 
+#K=3
+(plot23 <- admix_gg23 %>% 
+    ggplot() + geom_col(aes(x=SPP_ID1, y=clust, fill=clustname),width = 1) + 
+    scale_x_discrete(expand=c(0,0)) + 
+    scale_y_continuous(expand=c(0,0)) +
+    scale_fill_manual(name="Cluster",
+                      values=c("#6bc5d2","#e688a1","#e3c878"),
+                      labels=c("cluster1", "cluster2", "cluster3","cluster4", "cluster5"))+
+    theme_classic(base_size = 10) +
+    theme(axis.text.x = element_text(angle = 80, hjust = 0.5, size = 7)) +
+    labs(x="", y="K = 3") +
+    facet_grid(.~location_reord, scales = "free_x", space = "free_x") +
+    theme(strip.background = element_blank(), 
+          strip.text.x = element_blank(),
+          panel.spacing = unit(0, "lines"),
+          panel.border = element_rect(fill = NA, color = "gray10"),
+          axis.title.y = element_text(size = 12, face = "bold"),
+          axis.text.x=element_blank(),
+          axis.text.y=element_blank(),
+          axis.ticks.x=element_blank(),
+          axis.ticks.y=element_blank(),
+          legend.position = "none")) 
+#K=4
+(plot24 <- admix_gg24 %>% 
+    ggplot() + geom_col(aes(x=SPP_ID1, y=clust, fill=clustname),width = 1) + 
+    scale_x_discrete(expand=c(0,0)) + 
+    scale_y_continuous(expand=c(0,0)) +
+    scale_fill_manual(name="Cluster",
+                      values=c("#ffba92","#e3c878","#6bc5d2","#e688a1"),
+                      labels=c("cluster1", "cluster2", "cluster3","cluster4"))+
+    theme_classic(base_size = 10) +
+    theme(axis.text.x = element_text(angle = 80, hjust = 0.5, size = 7)) +
+    labs(x="", y="K = 4") +
+    facet_grid(.~location_reord, scales = "free_x", space = "free_x") +
+    theme(strip.background = element_blank(), 
+          strip.text.x = element_blank(),
+          panel.spacing = unit(0, "lines"),
+          panel.border = element_rect(fill = NA, color = "gray10"),
+          axis.title.y = element_text(size = 12, face = "bold"),
+          axis.text.x=element_blank(),
+          axis.text.y=element_blank(),
+          axis.ticks.x=element_blank(),
+          axis.ticks.y=element_blank(),
+          legend.position = "none")) 
+#K=5
+(plot25 <- admix_gg25 %>% 
+    ggplot() + geom_col(aes(x=SPP_ID1, y=clust, fill=clustname),width = 1) + 
+    scale_x_discrete(expand=c(0,0)) + 
+    scale_y_continuous(expand=c(0,0)) +
+    scale_fill_manual(name="Cluster",
+                      values=c("#e688a1","#d6e4aa","#e3c878","#ffba92","#6bc5d2"),
+                      labels=c("cluster1", "cluster2", "cluster3","cluster4", "cluster5"))+
+    theme_classic(base_size = 10) +
+    theme(axis.text.x = element_text(angle = 80, hjust = 0.5, size = 7)) +
+    labs(x="", y="K = 5") +
+    facet_grid(.~location_reord, scales = "free_x", space = "free_x") +
+    theme(strip.background = element_blank(), 
+          strip.text.x = element_blank(),
+          panel.spacing = unit(0, "lines"),
+          panel.border = element_rect(fill = NA, color = "gray10"),
+          axis.title.y = element_text(size = 12, face = "bold"),
+          axis.text.x=element_blank(),
+          axis.text.y=element_blank(),
+          axis.ticks.x=element_blank(),
+          axis.ticks.y=element_blank(),
+          legend.position = "none"
+          )) 
+(pr2 <- plot_grid(plot22,plot23,plot24,plot25, nrow=4, rel_heights = c(1.2,1,1,1), axis = "lr", align = "v" ))
+
+```
+***Region3***
+
+#mutate 
+
+```{r}
+admix_gg32 <- admix32 %>% gather(key = clustname, value = "clust", cluster1:cluster2) %>% 
+  arrange(clustname, clust) %>% 
+  mutate(
+    SPP_ID3 = fct_reorder2(as.factor(FID), LOCATION, clust),
+    Location = fct_reorder2(as.factor(LOCATION), clustname, clust),
+    clustname = fct_reorder2(factor(clustname, levels = c("cluster1", "cluster2")), clustname, clust),
+    
+  ) 
+admix_gg32$location_reord <- factor(admix_gg32$LOCATION, levels = c("WA", "CLB", "B","CO",  "SCA"))
+admix_gg32$Species <- factor(admix_gg32$Species, levels = c("Not Designated", "Santa Ana") )
+```
+
+```{r}
+admix_gg33 <- admix33 %>% gather(key = clustname, value = "clust", cluster1:cluster3) %>% 
+  arrange(clustname, clust) %>% 
+  mutate(
+    SPP_ID3 = fct_reorder2(as.factor(FID), LOCATION, clust),
+    Location = fct_reorder2(as.factor(LOCATION), clustname, clust),
+    clustname = fct_reorder2(factor(clustname, levels = c("cluster1", "cluster2", "cluster3")), clustname, clust))
+admix_gg33$location_reord <- factor(admix_gg33$LOCATION, levels =  c("WA", "CLB", "B","CO",  "SCA"))
+```
+
+```{r}
+#K=4
+admix_gg34 <- admix34 %>% gather(key = clustname, value = "clust", cluster1:cluster4) %>% 
+  arrange(clustname, clust) %>% 
+  mutate(
+    SPP_ID3 = fct_reorder2(as.factor(FID), LOCATION, clust),
+    Location = fct_reorder2(as.factor(LOCATION), clustname, clust),
+    clustname = fct_reorder2(factor(clustname, levels = c("cluster1", "cluster2", "cluster3","cluster4")), clustname, clust),
+    
+  ) #%>% group_by(SUBREGION)
+admix_gg34$location_reord <- factor(admix_gg34$LOCATION, levels =  c("WA", "CLB", "B","CO",  "SCA"))
+```
+
+```{r}
+admix_gg35 <- admix35 %>% gather(key = clustname, value = "clust", cluster1:cluster5) %>% 
+  arrange(clustname, clust) %>% 
+  mutate(
+    SPP_ID3 = fct_reorder2(as.factor(FID), LOCATION, clust),
+    Location = fct_reorder2(as.factor(LOCATION), clustname, clust),
+    clustname = fct_reorder2(factor(clustname, levels = c("cluster1", "cluster2", "cluster3","cluster4", "cluster5")), clustname, clust),
+    
+  ) 
+admix_gg35$location_reord <- factor(admix_gg35$LOCATION, levels =  c("WA", "CLB", "B","CO",  "SCA"))
+```
+
+```{r}
+textr3 <- admix_gg32 %>% ggplot(aes(x = SPP_ID3, y = "")) + #geom_tile( color = "black", aes (fill = sub)) +
+  facet_grid(.~Species, scale = "free", space = "free") + labs(x = "", y = "") + scale_x_discrete(expand=c(0,0)) +#scale_fill_viridis_d() +
+  theme(legend.position = "bottom")  + theme(legend.position = "none") + 
+  theme(panel.spacing=unit(0.02, "lines"),
+        #panel.border = element_rect(colour = "black"),
+        axis.text.x=element_blank(), 
+        axis.text.y= element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.ticks.y=element_blank())+
+  theme(strip.text = element_text(size = 11, face = "bold.italic"),
+        strip.background = element_blank(),
+      ) + theme(plot.margin=unit(c(0,0,0,0),"cm"))
+textr3
+```
+```{r}
+(plot32 <- admix_gg32 %>% 
+    ggplot() + geom_col(aes(x=SPP_ID3, y=clust, fill=clustname),width=1) + 
+    scale_x_discrete(expand=c(0,0)) + 
+    scale_y_continuous(expand=c(0,0)) +
+    scale_fill_manual(name="Cluster",
+                      values=c("#6bc5d2","#e3c878","#e688a1","#ffba92","#d6e4aa"),
+                      labels=c("cluster1", "cluster2", "cluster3","cluster4", "cluster5"))+
+    theme_classic(base_size = 10) +
+    theme(axis.text.x = element_text(angle = 80, hjust = 0.5, size = 7)) +
+    labs(x="", y="K = 2") +
+    facet_grid(.~location_reord, scales = "free_x", space = "free_x") +
+    theme(strip.background = element_blank(), 
+          strip.text = element_text(size = 11, face = "bold"),
+          panel.spacing = unit(0, "lines"),
+          panel.border = element_rect(fill = NA, color = "gray10"),
+          axis.title.y = element_text(size = 12, face = "bold"),
+          axis.text.x=element_blank(),
+          axis.text.y=element_blank(),
+          axis.ticks.x=element_blank(),
+          axis.ticks.y=element_blank(),
+          legend.position = "none")) 
+
+#K=3
+(plot33 <- admix_gg33 %>% 
+    ggplot() + geom_col(aes(x=SPP_ID3, y=clust, fill=clustname),width=1) + 
+    scale_x_discrete(expand=c(0,0)) + 
+    scale_y_continuous(expand=c(0,0)) +
+    scale_fill_manual(name="Cluster",
+                      values=c("#6bc5d2","#e688a1","#e3c878"),
+                      labels=c("cluster1", "cluster2", "cluster3","cluster4", "cluster5"))+
+    theme_classic(base_size = 10) +
+    theme(axis.text.x = element_text(angle = 80, hjust = 0.5, size = 7)) +
+    labs(x="", y="K = 3") +
+    facet_grid(.~location_reord, scales = "free_x", space = "free_x") +
+    theme(strip.background = element_blank(), 
+          #strip.text = element_text(size = 10, face = "bold"),
+          strip.text.x = element_blank(),
+          panel.spacing = unit(0, "lines"),
+          panel.border = element_rect(fill = NA, color = "gray10"),
+          axis.title.y = element_text(size = 12, face = "bold"),
+          axis.text.x=element_blank(),
+          axis.text.y=element_blank(),
+          axis.ticks.x=element_blank(),
+          axis.ticks.y=element_blank(),
+          legend.position = "none")) 
+#K=4
+(plot34 <- admix_gg34 %>% 
+    ggplot() + geom_col(aes(x=SPP_ID3, y=clust, fill=clustname),width=1) + 
+    scale_x_discrete(expand=c(0,0)) + 
+    scale_y_continuous(expand=c(0,0)) +
+    scale_fill_manual(name="Cluster",
+                      values=c("#6bc5d2","#ffba92","#e688a1","#e3c878"),
+                      labels=c("cluster1", "cluster2", "cluster3","cluster4"))+
+    theme_classic(base_size = 10) +
+    theme(axis.text.x = element_text(angle = 80, hjust = 0.5, size = 7)) +
+    labs(x="", y="K = 4") +
+    facet_grid(.~location_reord, scales = "free_x", space = "free_x") +
+    theme(strip.background = element_blank(), 
+          strip.text.x = element_blank(),
+          panel.spacing = unit(0, "lines"),
+          panel.border = element_rect(fill = NA, color = "gray10"),
+          axis.title.y = element_text(size = 12, face = "bold"),
+          axis.text.x=element_blank(),
+          axis.text.y=element_blank(),
+          axis.ticks.x=element_blank(),
+          axis.ticks.y=element_blank(),
+          legend.position = "none")) 
+
+#K=5
+(plot35 <- admix_gg35 %>% 
+    ggplot() + geom_col(aes(x=SPP_ID3, y=clust, fill=clustname),width=1) + 
+    scale_x_discrete(expand=c(0,0)) + 
+    scale_y_continuous(expand=c(0,0)) +
+    scale_fill_manual(name="Cluster",
+                      values=c("#d6e4aa","#6bc5d2","#e3c878","#ffba92","#e688a1"),
+                      labels=c("cluster1", "cluster2", "cluster3","cluster4", "cluster5"))+
+    theme_classic(base_size = 10) +
+    theme(axis.text.x = element_text(angle = 80, hjust = 0.5, size = 7)) +
+    labs(x="", y="K = 5") +
+    facet_grid(.~location_reord, scales = "free_x", space = "free_x") +
+    theme(strip.background = element_blank(), 
+          strip.text.x = element_blank(),
+          panel.spacing = unit(0, "lines"),
+          panel.border = element_rect(fill = NA, color = "gray10"),
+          axis.title.y = element_text(size = 12, face = "bold"),
+          axis.text.x=element_blank(),
+          axis.text.y=element_blank(),
+          axis.ticks.x=element_blank(),
+          axis.ticks.y=element_blank(),
+          legend.position = "none"
+          )) 
+
+(pr3 <- plot_grid(plot32,plot33,plot34,plot35, nrow=4, rel_heights = c(1.1,0.9,0.9,0.9), axis = "lr", align = "v" ))
+pr3
+```
