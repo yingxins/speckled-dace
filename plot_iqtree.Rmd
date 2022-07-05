@@ -1,0 +1,58 @@
+---
+title: "iqtree"
+author: "Yingxin Su"
+date: '2022-06-30'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(ggtree)
+library(tidyverse)
+library(ape)
+library(viridis)
+```
+
+```{r}
+tips <- read.table("label.txt",header = F)
+colnames(tips)[1]<- "Ind"
+colnames(tips)[2]<- "locations"
+tips$locations <- gsub("CentralCoast", "CentralCalifornia", tips$locations)
+iq <- read.tree("spk_bamlist_phylogeny_phylogeny1_prune_rep.min4.nexus.contree")
+iq <- root(iq,c("ind175", "ind176", "ind177", "ind178", "ind179","ind180", "ind181", "ind182", "ind183"))
+iq$tip.label <- tips$locations
+t<-as.polytomy(iq, feature='node.label', fun=function(x) as.numeric(x) < 75)
+t <- ggtree(t)
+t$data$Bootstrap<-as.numeric(t$data$label)
+
+```
+
+```{r}
+d <- t$data
+d <- d[!d$isTip,]
+d$label <- as.numeric(d$label)
+d <- d[d$label >= 90,]
+e <- t$data
+e <- e[!e$isTip,]
+e$label <- as.numeric(e$label)
+e <- e[e$label < 90,]
+e <- e[e$label >= 75,]
+f <- t$data
+f <- f[!f$isTip,]
+f$label <- as.numeric(f$label)
+f <- f[f$label < 75,]
+
+```
+
+```{r}
+(t2<-t +
+  geom_point(data=e,  fill="grey70", cex=2, alpha=0.75, pch=21) +
+  geom_point(data=d,  fill="black", cex=2, alpha=0.75, pch=21) + 
+  geom_point(data=f,  fill="white", cex=2, alpha=0.75, pch=21)+
+  geom_tiplab(align=T,size=2)) + xlim(0,.2) 
+ggsave("rectangular-tree.pdf", width=8, height=12)
+```
+
