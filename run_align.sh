@@ -29,8 +29,7 @@ do
 	echo "#!/bin/bash -l
 
 bwa mem -t 4 $ref ${c1} ${c2} | samtools view -Sb - | samtools sort - > ${c3}.sort.bam
-samtools view -f 0x2 -b ${c3}.sort.bam | samtools rmdup - ${c3}.sort.flt.bam
-bwa -a is $ref ${c3}.sort.flt.bam" > ${c3}.sh
+samtools view -f 0x2 -b ${c3}.sort.bam | samtools rmdup - ${c3}.sort.flt.bam" > ${c3}.sh
 
 	sbatch -t 1:00:00 -c 4 --mem=2G ${c3}.sh
 
